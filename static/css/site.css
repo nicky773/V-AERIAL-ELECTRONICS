@@ -83,6 +83,7 @@ body { font-family: Inter, Segoe UI, sans-serif; color: var(--ink); background: 
 }
 
 /* AERIAL theme preferences */
+html[data-theme="dark"] { background: #0d1624; color-scheme: dark; }
 html[data-theme="dark"] body,
 html[data-theme="dark"] .bg-light {
   background: #0d1624 !important;
@@ -149,6 +150,8 @@ iframe.goog-te-banner-frame { display:none !important; visibility:hidden !import
 .auth-shell { min-height: 62vh; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; }
 .auth-card { width: 100%; max-width: 500px; min-width: 0; border-radius: 1.1rem; }
 .auth-form .form-control { width: 100%; min-width: 0; }
+.auth-form .input-group .form-control { width: 1%; flex: 1 1 auto; }
+.auth-form .input-group .btn { min-height: 48px; }
 /* Header buttons keep one-line labels on laptop and desktop widths. */
 @media (min-width: 1200px) { .navbar .btn { white-space: nowrap; } }
 /* Laptops between 992px and 1199px: the header has no room for the second language picker (Google Translate stays). */
@@ -164,6 +167,34 @@ iframe.goog-te-banner-frame { display:none !important; visibility:hidden !import
 .otp-box { flex: 1 1 0; min-width: 0; max-width: 3.3rem; min-height: 56px !important; padding: 0 !important; text-align: center; font-size: clamp(1.25rem, 5vw, 1.7rem); font-weight: 700; }
 .otp-box:focus { border-color: #0d6efd; box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .2); }
 .otp-box:disabled { opacity: .6; }
+
+/* Sign-in page: product image panel on the left, login form on the right (stacks on phones). */
+.login-split { padding: 1.5rem 1rem 2.5rem; }
+.login-split-inner { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+@media (min-width: 992px) {
+  .login-split { padding: 2.5rem 1.5rem 3rem; }
+  .login-split-inner { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.75rem; align-items: stretch; }
+}
+.login-hero { position: relative; display: none; border-radius: 1.25rem; min-height: 520px; padding: 2.5rem; color: #fff; align-items: flex-end; background-color: #1f2a44;
+  background-image: linear-gradient(to top, rgba(9, 30, 66, .9) 0%, rgba(9, 30, 66, .25) 45%, rgba(9, 30, 66, 0) 70%), url('/static/img/login-customer.jpg');
+  background-size: cover; background-position: center; background-repeat: no-repeat; }
+@media (min-width: 992px) { .login-hero { display: flex; } }
+.login-hero-admin { background-image: linear-gradient(to top, rgba(9, 30, 66, .9) 0%, rgba(9, 30, 66, .25) 45%, rgba(9, 30, 66, 0) 70%), url('/static/img/login-admin.png'); background-position: center top; }
+/* Profile pages (customer and administrator). */
+.profile-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; margin-top: 1.5rem; }
+@media (min-width: 768px) { .profile-layout { grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); align-items: start; } }
+.profile-photo-card { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.profile-avatar-frame { width: 160px; height: 160px; max-width: 100%; border-radius: 50%; overflow: hidden; background: #eaf2ff; display: grid; place-items: center; }
+.profile-avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.profile-avatar-initial { font-size: 3.5rem; font-weight: 700; color: #0d6efd; }
+.admin-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; display: block; margin-bottom: .5rem; }
+.login-hero-badge { position: absolute; top: 1.5rem; left: 1.5rem; width: 132px; height: auto; padding: .6rem; border-radius: .85rem; background: #fff; box-shadow: 0 .25rem 1rem rgba(0, 0, 0, .15); }
+.login-hero-eyebrow { font-size: .78rem; font-weight: 700; letter-spacing: .14em; opacity: .85; }
+.login-hero-title { font-size: clamp(1.6rem, 2.6vw, 2.2rem); font-weight: 700; margin: .5rem 0 .75rem; }
+.login-hero-text { opacity: .9; max-width: 28rem; margin: 0; }
+.login-panel { display: flex; align-items: center; border-radius: 1.25rem; padding: 2rem 1.25rem; }
+.login-panel-inner { width: 100%; max-width: 380px; margin: 0 auto; }
+@media (min-width: 576px) { .login-panel { padding: 2.5rem 2rem; } }
 @media (max-width: 575.98px) {
   .auth-shell { min-height: auto; padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
   .auth-card { border-radius: .85rem; }
@@ -183,4 +214,5 @@ iframe.goog-te-banner-frame { display:none !important; visibility:hidden !import
   input, select, textarea { font-size: 16px !important; }
   .btn { min-height: 42px; }
 }
+
 

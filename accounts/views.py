@@ -27,11 +27,16 @@ from fido2.webauthn import (
     PublicKeyCredentialUserEntity,
 )
 
-from .models import PasskeyCredential, PhoneCredential
+from django.contrib.admin.views.decorators import staff_member_required
+
+from .forms import ProfileForm
+from .models import PasskeyCredential, PhoneCredential, UserProfile
 from orders.models import EmailOTP, Order
 from .otp import OTPRateLimitError, issue_email_otp, mask_email, verify_email_otp
 
 logger = logging.getLogger(__name__)
+
+REMEMBER_ME_SECONDS = 60 * 60 * 24 * 14
 
 
 def passkey_challenge(value):
@@ -62,7 +67,7 @@ def _set_otp_session(request, user, purpose, email=None):
 
 
 def _clear_otp_session(request):
-    for key in ('otp_user_id', 'otp_purpose', 'otp_email', 'otp_last_sent', 'otp_next', 'password_reset_user_id', 'password_reset_verified', 'password_reset_verified_at'):
+    for key in ('otp_user_id', 'otp_purpose', 'otp_email', 'otp_last_sent', 'otp_next', 'otp_remember', 'password_reset_user_id', 'password_reset_verified', 'password_reset_verified_at'):
         request.session.pop(key, None)
 
 
@@ -202,12 +207,17 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
 
         next_url = _safe_next(request, request.GET.get('next') or request.POST.get('next'))
-        if user and user.is_active:
+        remember = bool(request.POST.get('remember'))
+        if user and user.is_active and user.is_staff:
+            # Administrators must use the separate admin sign-in page; never send them a customer code.
+            messages.error(request, 'Administrator accounts sign in on the Admin sign-in page.')
+        elif user and user.is_active:
             try:
                 issue_email_otp(user, 'login', 'Your Sign-In Verification Code', 'Use this code to finish signing in.')
             except OTPRateLimitError:
                 _set_otp_session(request, user, 'login')
                 request.session['otp_next'] = next_url
+                request.session['otp_remember'] = remember
                 messages.info(request, 'A recent sign-in code may still be valid. Check your inbox before requesting another.')
                 return redirect('verify_otp')
             except Exception:
@@ -216,6 +226,7 @@ def login_view(request):
             else:
                 _set_otp_session(request, user, 'login')
                 request.session['otp_next'] = next_url
+                request.session['otp_remember'] = remember
                 messages.success(request, f'We sent a verification code to {mask_email(user.email)}.')
                 return redirect('verify_otp')
         else:
@@ -392,8 +403,11 @@ def verify_otp(request):
                     phone_credential.save(update_fields=['verified'])
             # Only a customer sign-in carries a return address; other purposes never use it.
             next_url = _safe_next(request, request.session.get('otp_next', '')) if purpose == 'login' else ''
+            remember = purpose == 'login' and bool(request.session.get('otp_remember'))
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             _clear_otp_session(request)
+            # Remember me keeps the sign-in for two weeks; otherwise it ends when the browser closes.
+            request.session.set_expiry(REMEMBER_ME_SECONDS if remember else 0)
             if next_url:
                 return redirect(next_url)
             if user.is_staff:
@@ -406,6 +420,49 @@ def verify_otp(request):
 @login_required
 def account(request):
     return render(request, 'accounts/account.html', {'orders': Order.objects.filter(user=request.user).order_by('-created_at')})
+
+
+def _handle_profile(request, base_template, redirect_name):
+    """Show and save the profile: display name and optional photo, for customers and administrators alike."""
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        if request.POST.get('action') == 'remove_photo':
+            if profile.photo:
+                profile.photo.delete(save=False)
+                profile.photo = ''
+                profile.save(update_fields=['photo', 'updated_at'])
+            messages.success(request, 'Your profile photo was removed.')
+            return redirect(redirect_name)
+
+        form = ProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            request.user.first_name = form.cleaned_data['full_name']
+            request.user.save(update_fields=['first_name'])
+            photo = form.cleaned_data.get('photo')
+            if photo:
+                if profile.photo:
+                    profile.photo.delete(save=False)
+                profile.photo = photo
+                profile.save()
+            messages.success(request, 'Your profile was saved.')
+            return redirect(redirect_name)
+    else:
+        form = ProfileForm(initial={'full_name': request.user.get_full_name()})
+    return render(request, 'accounts/profile.html', {
+        'form': form,
+        'profile': profile,
+        'base_template': base_template,
+    })
+
+
+@login_required
+def profile(request):
+    return _handle_profile(request, 'base.html', 'profile')
+
+
+@staff_member_required
+def admin_profile(request):
+    return _handle_profile(request, 'dashboard/base.html', 'admin_profile')
 
 
 def logout_view(request):

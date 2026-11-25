@@ -1,6 +1,10 @@
 from django.contrib import messages as django_messages
 from django.contrib.admin.views.decorators import staff_member_required
+import logging
+
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
@@ -9,6 +13,8 @@ from store.models import Category, Product, Promotion, SiteSettings
 from orders.models import Order
 from messaging.models import CustomerMessage
 from orders.views import generate_invoice_qr
+
+logger = logging.getLogger(__name__)
 
 
 @staff_member_required
@@ -160,10 +166,31 @@ def customers(request):
 @staff_member_required
 def messages(request):
     if request.method == 'POST':
-        message = get_object_or_404(CustomerMessage, id=request.POST['message_id'])
-        message.reply = request.POST['reply']
+        message = get_object_or_404(CustomerMessage, id=request.POST.get('message_id'))
+        reply = request.POST.get('reply', '').strip()
+        if not reply:
+            django_messages.error(request, 'Write a reply before sending.')
+            return redirect('admin_messages')
+
+        message.reply = reply
+        try:
+            send_mail(
+                f'Re: {message.subject}',
+                f'Hello {message.name},\n\n{reply}\n\nAERIAL ELECTRONICS\nUnder the Makuza Building, KN 74 St, Kigali, Rwanda',
+                settings.DEFAULT_FROM_EMAIL,
+                [message.email],
+                fail_silently=False,
+            )
+        except Exception:
+            logger.exception('Could not email a reply to a customer message.')
+            message.replied = False
+            message.save(update_fields=['reply', 'replied'])
+            django_messages.error(request, f'The reply was saved, but the email to {message.email} could not be sent. Try again.')
+            return redirect('admin_messages')
+
         message.replied = True
-        message.save()
+        message.save(update_fields=['reply', 'replied'])
+        django_messages.success(request, f'Reply sent to {message.email}.')
         return redirect('admin_messages')
     return render(request, 'dashboard/messages.html', {'messages': CustomerMessage.objects.order_by('-created_at')})
 

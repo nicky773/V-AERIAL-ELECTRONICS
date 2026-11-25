@@ -1,0 +1,65 @@
+{% extends base_template %}
+{% block title %}My profile{% endblock %}
+{% block content %}
+<div class="{% if base_template == 'base.html' %}container py-5{% endif %}">
+  <h1 class="h3 fw-bold mb-1">My profile</h1>
+  <p class="text-muted">{{ user.email }}</p>
+
+  <div class="profile-layout">
+    <section class="card border-0 shadow-sm p-4 profile-photo-card">
+      <div class="profile-avatar-frame mb-3" id="profileAvatarFrame">
+        {% if profile.photo %}
+          <img id="profileAvatarImage" src="{{ profile.photo.url }}" alt="Your profile photo" class="profile-avatar-img">
+        {% else %}
+          <span class="profile-avatar-initial" id="profileAvatarInitial" aria-hidden="true">{{ user.first_name|default:user.email|slice:":1"|upper }}</span>
+        {% endif %}
+      </div>
+      <p class="small text-muted mb-3">JPG, PNG or WebP, up to 2 MB.</p>
+      {% if profile.photo %}
+        <form method="post" class="w-100">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="remove_photo">
+          <button class="btn btn-outline-danger w-100" type="submit">Remove photo</button>
+        </form>
+      {% endif %}
+    </section>
+
+    <section class="card border-0 shadow-sm p-4">
+      <form method="post" enctype="multipart/form-data" data-loading-form>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+
+        <label class="form-label" for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+        <input id="{{ form.full_name.id_for_label }}" name="{{ form.full_name.html_name }}" value="{{ form.full_name.value|default:'' }}" maxlength="150" class="form-control mb-1" required>
+        {% for error in form.full_name.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+        <div class="mb-3"></div>
+
+        <label class="form-label" for="{{ form.photo.id_for_label }}">{{ form.photo.label }}</label>
+        <input id="{{ form.photo.id_for_label }}" type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="form-control mb-1" data-photo-input>
+        {% for error in form.photo.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+        <div class="mb-4"></div>
+
+        <button class="btn btn-primary auth-submit" type="submit"><span class="button-label">Save profile</span><span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span></button>
+      </form>
+    </section>
+  </div>
+</div>
+<script>
+(() => {
+  // Show the chosen photo immediately, before it is saved.
+  const input = document.querySelector('[data-photo-input]');
+  const frame = document.getElementById('profileAvatarFrame');
+  input?.addEventListener('change', () => {
+    const file = input.files && input.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const url = URL.createObjectURL(file);
+    frame.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = 'Photo preview';
+    img.className = 'profile-avatar-img';
+    frame.appendChild(img);
+  });
+})();
+</script>
+{% endblock %}

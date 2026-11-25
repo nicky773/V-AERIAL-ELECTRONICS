@@ -27,7 +27,18 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-aerial-electronics-develop
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
+
+if not DEBUG:
+    from django.core.exceptions import ImproperlyConfigured
+    if SECRET_KEY.startswith('django-insecure'):
+        raise ImproperlyConfigured('Set a real SECRET_KEY environment variable before turning DEBUG off.')
+    # Render terminates HTTPS in front of the app; trust its forwarded-protocol header.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
 
 
 # Application definition
@@ -86,14 +97,19 @@ WSGI_APPLICATION = 'aerial_project.wsgi.application'
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
+    # Render's Postgres gives one connection string: postgresql://user:password@host:port/name
+    from urllib.parse import unquote, urlparse
+    _db = urlparse(DATABASE_URL)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'aerial_electronics'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD', ''),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+            'NAME': _db.path.lstrip('/'),
+            'USER': unquote(_db.username or ''),
+            'PASSWORD': unquote(_db.password or ''),
+            'HOST': _db.hostname or '',
+            'PORT': str(_db.port or 5432),
+            'CONN_MAX_AGE': 600,
+            'OPTIONS': {'sslmode': os.getenv('DB_SSLMODE', 'prefer')},
         }
     }
 else:
@@ -163,6 +179,10 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
 EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '20'))
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'AERIAL ELECTRONICS <aerialelectronics0@gmail.com>')
+# Local development without a Gmail app password: print sign-in codes in the runserver terminal
+# instead of failing. Only applies when DEBUG is on, so production always sends real email.
+if DEBUG and not EMAIL_HOST_PASSWORD and EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend':
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # SMS login (MTN API)
 SMS_BACKEND = os.getenv('SMS_BACKEND', 'django.core.mail.backends.console.EmailBackend')

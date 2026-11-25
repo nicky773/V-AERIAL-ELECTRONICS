@@ -274,6 +274,18 @@ class AuthenticationFlowTests(TestCase):
         self.assertRedirects(response, '/cart/')
         self.assertTrue(response.wsgi_request.user.is_authenticated)
 
+    def test_remember_me_keeps_session_for_two_weeks(self):
+        user = User.objects.create_user(username='remember@example.com', email='remember@example.com', password='Strong-test-password-42!')
+        self.client.post(reverse('login'), {'identifier': user.email, 'password': 'Strong-test-password-42!', 'remember': '1'})
+        self.client.post(reverse('verify_otp'), {'code': self.get_code()})
+        self.assertEqual(self.client.session.get_expiry_age(), 60 * 60 * 24 * 14)
+
+    def test_without_remember_me_session_ends_with_browser(self):
+        user = User.objects.create_user(username='noremember@example.com', email='noremember@example.com', password='Strong-test-password-42!')
+        self.client.post(reverse('login'), {'identifier': user.email, 'password': 'Strong-test-password-42!'})
+        self.client.post(reverse('verify_otp'), {'code': self.get_code()})
+        self.assertTrue(self.client.session.get_expire_at_browser_close())
+
     def test_external_next_address_is_ignored_after_code(self):
         user = User.objects.create_user(username='nextbad@example.com', email='nextbad@example.com', password='Strong-test-password-42!')
         self.client.post(reverse('login') + '?next=https://evil.example.com/', {'identifier': user.email, 'password': 'Strong-test-password-42!'})
