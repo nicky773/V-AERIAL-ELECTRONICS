@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}AERIAL Admin Login{% endblock %}
+{% block content %}
+<main class="auth-shell container py-5">
+  <div class="auth-card card border-0 shadow-lg mx-auto">
+      <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-3"><i class="bi bi-shield-lock display-4 text-primary"></i><h3 class="fw-bold mt-2">AERIAL Administrator</h3><p class="text-muted">Authorized staff sign in only.</p></div>
+        <form method="post" data-loading-form>
+          {% csrf_token %}
+          <label class="form-label">Administrator email</label><input id="staffEmail" type="email" name="email" class="form-control mb-3" required>
+          <label class="form-label">Strong password</label><input type="password" name="password" class="form-control mb-3" required>
+          <button class="btn btn-primary w-100 auth-submit" type="submit"><span class="button-label">Verify identity</span><span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span></button>
+        </form>
+        <div class="text-center my-3 text-muted">or</div>
+        <button id="staffPasskeyButton" type="button" class="btn btn-outline-primary w-100">
+          <i class="bi bi-fingerprint"></i> Use Face or Fingerprint
+        </button>
+        <div id="staffPasskeyStatus" class="alert d-none mt-3 mb-0"></div>
+      </div>
+  </div>
+</main>
+<script>
+(function () {
+  const emailInput = document.getElementById('staffEmail');
+  const button = document.getElementById('staffPasskeyButton');
+  const status = document.getElementById('staffPasskeyStatus');
+
+  function cookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : '';
+  }
+
+  function decode(value) {
+    const base64 = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=');
+    const binary = atob(base64);
+    return Uint8Array.from(binary, c => c.charCodeAt(0)).buffer;
+  }
+
+  function base64Url(value) {
+    const bytes = new Uint8Array(value);
+    let binary = '';
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function prepare(options) {
+    options.challenge = decode(options.challenge);
+    if (options.allowCredentials) {
+      options.allowCredentials.forEach(c => c.id = decode(c.id));
+    }
+    return options;
+  }
+
+  async function post(url, payload) {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': cookie('csrftoken')},
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Passkey sign-in failed.');
+    return data;
+  }
+
+  if (!window.isSecureContext) {
+    status.className = 'alert alert-danger';
+    status.textContent = 'Face and fingerprint sign-in requires HTTPS or http://localhost.';
+    status.classList.remove('d-none');
+  } else if (!window.PublicKeyCredential) {
+    status.className = 'alert alert-danger';
+    status.textContent = 'This browser does not support passkeys. Use Chrome or Edge.';
+    status.classList.remove('d-none');
+  }
+
+  button.addEventListener('click', async () => {
+    status.className = 'alert alert-info';
+    status.textContent = 'Waiting for face, fingerprint or device PIN...';
+    status.classList.remove('d-none');
+
+    try {
+      const begin = await post('{% url "passkey_login_begin" %}', {});
+      const credential = await navigator.credentials.get({publicKey: prepare(begin.publicKey)});
+      const response = {
+        id: credential.id,
+        rawId: base64Url(credential.rawId),
+        type: credential.type,
+        response: {
+          clientDataJSON: base64Url(credential.response.clientDataJSON),
+          authenticatorData: base64Url(credential.response.authenticatorData),
+          signature: base64Url(credential.response.signature),
+          userHandle: credential.response.userHandle ? base64Url(credential.response.userHandle) : null
+        }
+      };
+      const complete = await post('{% url "passkey_login_complete" %}', response);
+      window.location.href = complete.redirect;
+    } catch (error) {
+      status.className = 'alert alert-danger';
+      status.textContent = (error.name ? error.name + ': ' : '') + (error.message || 'Face or fingerprint sign-in was cancelled or unavailable.');
+    }
+  });
+})();
+</script>
+{% endblock %}

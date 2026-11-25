@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h1 class="fw-bold mb-4">Checkout</h1>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <form method="post" class="card border-0 shadow-sm p-4" id="checkoutForm">
+        {% csrf_token %}
+        <h5 class="mb-3">Delivery details</h5>
+        <label class="form-label">Delivery address</label>
+        <textarea class="form-control mb-4" name="address" rows="3" required placeholder="Street, sector, district, Kigali"></textarea>
+        <h5 class="mb-3">Customer details</h5>
+        <label class="form-label">Name of person ordering</label>
+        <input class="form-control mb-3" name="customer_name" value="{{ user.get_full_name|default:user.username }}" required>
+        <label class="form-label">Name used to make payment</label>
+        <input class="form-control mb-4" name="payer_name" required placeholder="MTN account holder or bank transfer name">
+        <h5 class="mb-3">Payment method</h5>
+        <div class="form-check card p-3 mb-2"><input class="form-check-input" type="radio" name="payment_method" id="payMtn" value="mtn" checked><label class="form-check-label fw-bold" for="payMtn">MTN Mobile Money</label><div class="mt-2" id="mtnDetails"><label class="form-label small">MTN phone number</label><input class="form-control" name="phone" id="mtnPhone" placeholder="250 788 000 000"></div></div>
+        <div class="form-check card p-3 mb-2"><input class="form-check-input" type="radio" name="payment_method" id="payEquity" value="equity"><label class="form-check-label fw-bold" for="payEquity">Equity Bank transfer</label><div class="mt-2 bank-details d-none" id="equityDetails"><p class="small mb-2">Transfer RWF {{ total|floatformat:0 }} to account: <strong>{{ equity_account }}</strong>.</p><label class="form-label small">Your account or transfer reference</label><input class="form-control" name="bank_reference" id="equityReference" placeholder="Equity account or reference"></div></div>
+        <div class="form-check card p-3 mb-3"><input class="form-check-input" type="radio" name="payment_method" id="payBk" value="bk"><label class="form-check-label fw-bold" for="payBk">Bank of Kigali (BK) transfer</label><div class="mt-2 bank-details d-none" id="bkDetails"><p class="small mb-2">Transfer RWF {{ total|floatformat:0 }} to account: <strong>{{ bk_account }}</strong>.</p><label class="form-label small">Your account or transfer reference</label><input class="form-control" name="bank_reference" id="bkReference" placeholder="BK account or reference"></div></div>
+        <button class="btn btn-primary btn-lg w-100">Place order</button>
+      </form>
+    </div>
+    <div class="col-lg-5"><div class="card border-0 shadow-sm p-4"><h5>Order summary</h5>{% for item in items %}<div class="d-flex justify-content-between border-bottom py-2"><span>{{ item.product.name }} × {{ item.quantity }}</span><strong>RWF {{ item.total|floatformat:0 }}</strong></div>{% endfor %}<div class="d-flex justify-content-between mt-3"><strong>Total</strong><strong class="price">RWF {{ total|floatformat:0 }}</strong></div></div></div>
+  </div>
+</div>
+<script>
+(function(){
+  const mtn=document.getElementById('payMtn'),equity=document.getElementById('payEquity'),bk=document.getElementById('payBk');
+  const mtnDetails=document.getElementById('mtnDetails'),equityDetails=document.getElementById('equityDetails'),bkDetails=document.getElementById('bkDetails');
+  const mtnPhone=document.getElementById('mtnPhone'),equityReference=document.getElementById('equityReference'),bkReference=document.getElementById('bkReference');
+  function update(){mtnDetails.classList.toggle('d-none',!mtn.checked);equityDetails.classList.toggle('d-none',!equity.checked);bkDetails.classList.toggle('d-none',!bk.checked);mtnPhone.required=mtn.checked;equityReference.required=equity.checked;bkReference.required=bk.checked}
+  [mtn,equity,bk].forEach(input=>input.addEventListener('change',update));update();
+})();
+</script>
+{% endblock %}

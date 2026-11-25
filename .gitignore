@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.venv/
+staticfiles/
+__pycache__/
+*.py[cod]
+
+# Local database (contains customer accounts) and uploaded media
+db.sqlite3
+*.sqlite3
+media/

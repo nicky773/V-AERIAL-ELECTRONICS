@@ -1,0 +1,47 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<h2>Inventory</h2>
+<div class="card stat-card p-3 mt-3">
+  <form method="post" enctype="multipart/form-data" class="row g-2 mb-4">
+    {% csrf_token %}
+    <div class="col-md-3"><input name="name" class="form-control" placeholder="Product name" required></div>
+    <div class="col-md-2"><select name="category" class="form-select" required>{% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-2"><input name="price" type="number" class="form-control" placeholder="Price RWF" required></div>
+    <div class="col-md-2"><input name="stock" type="number" class="form-control" placeholder="Stock" required></div>
+    <div class="col-md-3"><input name="image_url" type="url" class="form-control" placeholder="Product image URL"></div>
+    <div class="col-md-3"><input name="image" type="file" accept="image/*" class="form-control"></div>
+    <div class="col-md-2"><div class="form-check mt-2"><input name="featured" type="checkbox" class="form-check-input" id="featured-new"><label class="form-check-label" for="featured-new">Featured</label></div></div>
+    <div class="col-md-10"><textarea name="description" class="form-control" placeholder="Description" required></textarea></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100">Add product</button></div>
+  </form>
+
+  <table class="table align-middle">
+    <thead><tr><th>Image</th><th>Product</th><th>Category</th><th>Price RWF</th><th>Stock</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for product in products %}
+      <tr>
+        <td>{% if product.image_url %}<img src="{{ product.image_url }}" alt="{{ product.name }}" class="inventory-thumb">{% elif product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" class="inventory-thumb">{% else %}<i class="bi bi-device-hdd"></i>{% endif %}</td>
+        <td>{{ product.name }}</td><td>{{ product.category.name }}</td><td>{{ product.price|floatformat:0 }}</td><td>{{ product.stock }}</td>
+        <td><button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#edit-{{ product.id }}">Edit</button>
+          <form method="post" class="d-inline">{% csrf_token %}<input type="hidden" name="action" value="delete"><input type="hidden" name="product_id" value="{{ product.id }}"><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this product?')">Delete</button></form></td>
+      </tr>
+      <tr class="collapse" id="edit-{{ product.id }}"><td colspan="6">
+        <form method="post" enctype="multipart/form-data" class="row g-2 p-2">
+          {% csrf_token %}<input type="hidden" name="product_id" value="{{ product.id }}">
+          <div class="col-md-3"><input name="name" value="{{ product.name }}" class="form-control" required></div>
+          <div class="col-md-2"><select name="category" class="form-select">{% for c in categories %}<option value="{{ c.id }}" {% if c.id == product.category_id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></div>
+          <div class="col-md-2"><input name="price" type="number" value="{{ product.price|floatformat:0 }}" class="form-control" required></div>
+          <div class="col-md-2"><input name="stock" type="number" value="{{ product.stock }}" class="form-control" required></div>
+          <div class="col-md-3"><input name="image_url" type="url" value="{{ product.image_url }}" class="form-control"></div>
+          <div class="col-md-3"><input name="image" type="file" accept="image/*" class="form-control"></div>
+          <div class="col-md-2"><div class="form-check mt-2"><input name="featured" type="checkbox" class="form-check-input" id="featured-{{ product.id }}" {% if product.featured %}checked{% endif %}><label class="form-check-label" for="featured-{{ product.id }}">Featured</label></div></div>
+          <div class="col-md-10"><textarea name="description" class="form-control" rows="2">{{ product.description }}</textarea></div>
+          <div class="col-md-2"><button class="btn btn-primary w-100">Save changes</button></div>
+        </form>
+      </td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

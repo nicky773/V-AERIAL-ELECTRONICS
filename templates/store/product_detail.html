@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="row g-5">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm p-3 product-detail-image">
+        {% if product.image_url %}<img src="{{ product.image_url }}" class="img-fluid" alt="{{ product.name }}">
+        {% elif product.image %}<img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.name }}">
+        {% else %}<i class="bi bi-device-hdd display-1 text-primary"></i>{% endif %}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <small class="text-primary fw-bold">{{ product.category.name }}</small>
+      <h1 class="fw-bold mt-2">{{ product.name }}</h1>
+      <h3 class="price">RWF {{ product.price|floatformat:0 }}</h3>
+      {% if product.stock > 5 %}<p class="text-success"><i class="bi bi-check-circle-fill"></i> {{ product.stock }} units available</p>{% elif product.stock > 0 %}<p class="text-warning"><i class="bi bi-exclamation-circle-fill"></i> Only {{ product.stock }} units left</p>{% else %}<p class="text-danger"><i class="bi bi-x-circle-fill"></i> Out of stock</p>{% endif %}
+      <p class="text-muted">{{ product.description }}</p>
+      {% if product.stock > 0 %}<a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary btn-lg px-5"><i class="bi bi-bag-plus"></i> Add to cart</a>{% else %}<button class="btn btn-secondary btn-lg px-5" disabled><i class="bi bi-bag-x"></i> Out of stock</button>{% endif %}
+    </div>
+  </div>
+  <h3 class="fw-bold mt-5 mb-3">Related products</h3>
+  <div class="row g-3">{% for item in related %}<div class="col-6 col-md-3"><a class="card product-card p-3 h-100 text-decoration-none text-dark" href="{% url 'product_detail' item.slug %}"><h6>{{ item.name }}</h6><span class="price">RWF {{ item.price|floatformat:0 }}</span></a></div>{% endfor %}</div>
+</div>
+{% endblock %}

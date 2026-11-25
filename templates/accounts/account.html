@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}My account{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between">
+    <div><h1>My account</h1><p class="text-muted">{{ user.email }}</p></div>
+    <a href="{% url 'logout' %}" class="btn btn-outline-danger align-self-start">Sign out</a>
+  </div>
+
+  <div class="card border-0 shadow-sm p-4 mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-2">
+      <div>
+        <h4 class="mb-1"><i class="bi bi-geo-alt-fill text-primary"></i> AERIAL ELECTRONICS Location</h4>
+        <p class="text-muted mb-0"><strong>Under the Makuza Building</strong> — KN 74 St, Kigali, Rwanda</p>
+      </div>
+      <a target="_blank" rel="noopener" class="btn btn-primary" href="https://www.google.com/maps/search/?api=1&query=Makuza+Peace+Plaza,+KN+74+St,+Kigali,+Rwanda"><i class="bi bi-map"></i> Open map / Get directions</a>
+    </div>
+    <iframe
+      class="location-map"
+      style="display:block;width:100%;height:360px;border:1px solid #dee2e6;border-radius:12px"
+      title="Map showing AERIAL ELECTRONICS under Makuza Building"
+      src="https://maps.google.com/maps?q=Makuza%20Peace%20Plaza%2C%20KN%2074%20St%2C%20Kigali%2C%20Rwanda&t=&z=16&ie=UTF8&iwloc=near&output=embed"
+      loading="eager"
+      referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-lg-8">
+      <h4>My orders</h4>
+      {% for order in orders %}
+      <a class="card border-0 shadow-sm p-3 mb-2 text-decoration-none text-dark" href="{% url 'order_detail' order.id %}">
+        <div class="d-flex justify-content-between align-items-center"><strong>Order #{{ order.id }}</strong><span>RWF {{ order.total|floatformat:0 }}</span><span class="badge bg-primary">{{ order.status|title }}</span></div>
+      </a>
+      {% empty %}<div class="alert alert-light">You have no orders yet.</div>{% endfor %}
+    </div>
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm p-4">
+        <h5><i class="bi bi-building text-primary"></i> About AERIAL ELECTRONICS</h5>
+        <p class="text-muted">We supply quality electronics and technology solutions across Kigali and Rwanda.</p>
+        <p class="mb-1"><strong>Under the Makuza Building</strong></p>
+        <p class="mb-1"><i class="bi bi-geo-alt"></i> KN 74 St, Kigali, Rwanda</p>
+        <p class="mb-1"><i class="bi bi-telephone"></i> +250 788 945 021</p>
+        <p class="mb-0"><strong>CEO:</strong> Joseph Byiringiro</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

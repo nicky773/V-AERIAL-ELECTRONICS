@@ -1,0 +1,48 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Categories | AERIAL Admin{% endblock %}
+{% block content %}
+<h2>Product Categories</h2>
+<p class="text-muted">Create categories here. They appear automatically on the customer storefront.</p>
+<div class="card stat-card p-3 mt-3">
+  <form method="post" class="row g-2 mb-4">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create">
+    <div class="col-md-4"><input name="name" class="form-control" placeholder="Category name" required></div>
+    <div class="col-md-2"><input name="icon" class="form-control" placeholder="Icon, e.g. laptop"></div>
+    <div class="col-md-4"><input name="image_url" type="url" class="form-control" placeholder="Category image URL"></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100">Add category</button></div>
+  </form>
+  <table class="table align-middle">
+    <thead><tr><th>Image</th><th>Name</th><th>Slug</th><th>Products</th><th></th></tr></thead>
+    <tbody>
+      {% for category in categories %}
+      <tr>
+        <td>{% if category.image_url %}<img src="{{ category.image_url }}" alt="{{ category.name }}" class="inventory-thumb">{% else %}<i class="bi bi-{{ category.icon|default:'cpu' }} fs-4"></i>{% endif %}</td>
+        <td><strong>{{ category.name }}</strong></td>
+        <td>{{ category.slug }}</td>
+        <td>{{ category.products.count }}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#edit-category-{{ category.id }}">Edit</button>
+          {% if not category.products.exists %}
+          <form method="post" class="d-inline">{% csrf_token %}<input type="hidden" name="action" value="delete"><input type="hidden" name="category_id" value="{{ category.id }}"><button class="btn btn-sm btn-outline-danger">Remove</button></form>
+          {% else %}<span class="text-muted small">Used by products</span>{% endif %}
+        </td>
+      </tr>
+      <tr class="collapse" id="edit-category-{{ category.id }}">
+        <td colspan="5">
+          <form method="post" class="row g-2">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="category_id" value="{{ category.id }}">
+            <div class="col-md-4"><input name="name" class="form-control" placeholder="Category name" value="{{ category.name }}" required></div>
+            <div class="col-md-2"><input name="icon" class="form-control" placeholder="Icon, e.g. laptop" value="{{ category.icon|default:'' }}"></div>
+            <div class="col-md-4"><input name="image_url" type="url" class="form-control" placeholder="Category image URL" value="{{ category.image_url }}"></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100">Save</button></div>
+          </form>
+        </td>
+      </tr>
+      {% empty %}<tr><td colspan="5">No categories have been created.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

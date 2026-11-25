@@ -1,0 +1,140 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python -m pip install --upgrade pip; python -m pip install django django-crispy-forms crispy-bootstrap5 Pillow python-dotenv requests whitenoise$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "C:/Users/user/AppData/Local/Python/pythoncore-3.14-64/python.exe": true,
+        "print(v.__file__)": true,
+        "v.__file__": true,
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py check$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python -m pip install fido2$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python -c \"from fido2\\.server import Fido2Server; from fido2\\.webauthn import \\*; import fido2\\.webauthn as w; print\\(\\[x for x in dir\\(w\\) if 'Credential' in x or 'COSE' in x\\]\\); print\\(\\[x for x in dir\\(Fido2Server\\) if 'register' in x or 'authenticate' in x\\]\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py shell -c \"from store\\.models import Category,Product; c,_=Category\\.objects\\.get_or_create\\(slug='laptops-computers',defaults=\\{'name':'Laptops & Computers','icon':'laptop'\\}\\); p,_=Product\\.objects\\.update_or_create\\(slug='asus-rog-strix-g16-g614jv-as74',defaults=\\{'category':c,'name':'ASUS ROG Strix G16 Gaming Laptop','description':'ASUS ROG Strix G16 G614JV-AS74 with 165Hz display, NVIDIA GeForce RTX 4060, Intel Core i7-13650HX, 16GB DDR5 RAM, 1TB PCIe Gen4 SSD, Wi-Fi 6E, and Windows 11\\.','price':3500000,'stock':10,'image_url':'https://images\\.unsplash\\.com/photo-1593642702749-b7d2a804fbcf\\?auto=format&fit=crop&w=1000&q=85','featured':True\\}\\); print\\(p\\.name, p\\.price, p\\.stock\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py makemigrations; python manage\\.py migrate; python manage\\.py check$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py makemigrations accounts; python manage\\.py migrate; python manage\\.py check; python manage\\.py shell -c \"from django\\.contrib\\.auth\\.models import User; print\\(list\\(User\\.objects\\.filter\\(is_staff=True\\)\\.values_list\\('username','is_staff','is_superuser'\\)\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py shell -c \"from django\\.test import Client; c=Client\\(\\); r=c\\.post\\('/ai-assistant/',data=\\{'message':'How do I pay\\?','language':'en'\\},content_type='application/json'\\); print\\(r\\.status_code, r\\.json\\(\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py shell -c \"import json; from django\\.test import Client; c=Client\\(HTTP_HOST='127\\.0\\.0\\.1'\\); r=c\\.post\\('/ai-assistant/',data=json\\.dumps\\(\\{'message':'How do I pay\\?','language':'en'\\}\\),content_type='application/json'\\); print\\(r\\.status_code, r\\.json\\(\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py shell -c \"import json; from django\\.test import Client; c=Client\\(HTTP_HOST='127\\.0\\.0\\.1'\\); msgs=\\[\\('How do I pay\\?','en'\\),\\('Nigute nishyura\\?','rw'\\),\\('Comment payer\\?','fr'\\),\\('Jinsi ya kulipa\\?','sw'\\)\\]; \\[\\(lambda r: print\\(r\\.status_code,r\\.json\\(\\)\\['answer'\\]\\)\\)\\(c\\.post\\('/ai-assistant/',data=json\\.dumps\\(\\{'message':m,'language':l\\}\\),content_type='application/json'\\)\\) for m,l in msgs\\]\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python -c \"import inspect; from fido2\\.server import Fido2Server; print\\(inspect\\.signature\\(Fido2Server\\)\\); print\\(inspect\\.signature\\(Fido2Server\\.register_begin\\)\\); print\\(inspect\\.signature\\(Fido2Server\\.register_complete\\)\\); print\\(inspect\\.signature\\(Fido2Server\\.authenticate_begin\\)\\); print\\(inspect\\.signature\\(Fido2Server\\.authenticate_complete\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python -c \"from fido2\\.server import Fido2Server; import inspect; print\\(inspect\\.getsource\\(Fido2Server\\.register_complete\\)\\); print\\(inspect\\.getsource\\(Fido2Server\\.authenticate_complete\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python -c \"import inspect; from fido2\\.webauthn import AttestedCredentialData, PublicKeyCredentialRpEntity, PublicKeyCredentialUserEntity; print\\(inspect\\.signature\\(AttestedCredentialData\\)\\); print\\(inspect\\.signature\\(PublicKeyCredentialRpEntity\\)\\); print\\(inspect\\.signature\\(PublicKeyCredentialUserEntity\\)\\); print\\(inspect\\.getsource\\(AttestedCredentialData\\.create\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python -c \"from fido2\\.cose import CoseKey; import inspect; print\\(\\[x for x in dir\\(CoseKey\\) if 'parse' in x or 'for' in x\\]\\); print\\(inspect\\.signature\\(CoseKey\\.parse\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python -c \"from fido2\\.webauthn import PublicKeyCredentialRpEntity; print\\(\\[x for x in dir\\(PublicKeyCredentialRpEntity\\(name='x'\\)\\) if 'dict' in x or 'json' in x\\]\\); from fido2\\.server import Fido2Server; rp=PublicKeyCredentialRpEntity\\(name='AERIAL',id='localhost'\\); s=Fido2Server\\(rp\\); import inspect; print\\(\\[x for x in dir\\(s\\) if 'begin' in x\\]\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python -c \"from fido2\\.webauthn import PublicKeyCredentialRpEntity,PublicKeyCredentialUserEntity; from fido2\\.server import Fido2Server; from fido2 import webauthn; rp=PublicKeyCredentialRpEntity\\(name='AERIAL',id='localhost'\\); s=Fido2Server\\(rp\\); u=PublicKeyCredentialUserEntity\\(name='test@example\\.com',id=b'1',display_name='Test'\\); o,state=s\\.register_begin\\(u,user_verification='required'\\); print\\(type\\(o\\),o\\); print\\(dir\\(o\\)\\); print\\(o\\.__dict__ if hasattr\\(o,'__dict__'\\) else 'no dict'\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py makemigrations accounts; python manage\\.py migrate; python manage\\.py check$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py shell -c \"import json; from django\\.test import Client; from django\\.contrib\\.auth\\.models import User; u=User\\.objects\\.filter\\(is_staff=True\\)\\.first\\(\\); c=Client\\(HTTP_HOST='127\\.0\\.0\\.1'\\); c\\.force_login\\(u\\); r=c\\.post\\('/admin/passkey/register/begin/',data='\\{\\}',content_type='application/json'\\); print\\(r\\.status_code, r\\.json\\(\\)\\.keys\\(\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py check; python manage\\.py shell -c \"from django\\.test import Client; from django\\.contrib\\.auth\\.models import User; u=User\\.objects\\.filter\\(is_staff=True\\)\\.first\\(\\); c=Client\\(HTTP_HOST='127\\.0\\.0\\.1'\\); c\\.force_login\\(u\\); r=c\\.post\\('/admin/passkey/register/begin/',data='\\{\\}',content_type='application/json'\\); print\\(r\\.status_code, sorted\\(r\\.json\\(\\)\\.keys\\(\\)\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py shell -c \"from django\\.test import Client; from django\\.contrib\\.auth\\.models import User; u=User\\.objects\\.filter\\(is_staff=True\\)\\.first\\(\\); c=Client\\(HTTP_HOST='127\\.0\\.0\\.1'\\); c\\.force_login\\(u\\); r=c\\.post\\('/admin/passkey/verify/begin/',data='\\{\\}',content_type='application/json'\\); print\\(r\\.status_code, r\\.json\\(\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py check; python manage\\.py shell -c \"from django\\.contrib\\.auth\\.models import User; u=User\\.objects\\.filter\\(is_staff=True\\)\\.first\\(\\); print\\(u\\.username if u else 'NO_ADMIN', u\\.is_staff if u else False, u\\.is_superuser if u else False\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py makemigrations orders; python manage\\.py migrate; python manage\\.py check$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py shell -c \"from django\\.test import Client; from store\\.models import Product; p=Product\\.objects\\.filter\\(stock__gt=0\\)\\.first\\(\\); c=Client\\(HTTP_HOST='127\\.0\\.0\\.1'\\); before=p\\.stock; r=c\\.get\\('/cart/add/'\\+str\\(p\\.id\\)\\+'/',follow=True\\); p\\.refresh_from_db\\(\\); after_add=p\\.stock; r=c\\.get\\('/cart/remove/'\\+str\\(p\\.id\\)\\+'/',follow=True\\); p\\.refresh_from_db\\(\\); print\\(\\{'before':before,'after_add':after_add,'after_remove':p\\.stock,'ok':after_add==before-1 and p\\.stock==before\\}\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py check; python manage\\.py shell -c \"from django\\.test import Client; from django\\.contrib\\.auth\\.models import User; u=User\\.objects\\.filter\\(is_staff=True\\)\\.first\\(\\); c=Client\\(HTTP_HOST='localhost:8000'\\); c\\.force_login\\(u\\); r=c\\.post\\('/admin/passkey/register/begin/',data='\\{\\}',content_type='application/json'\\); d=r\\.json\\(\\); print\\(r\\.status_code, d\\['publicKey'\\]\\['rp'\\]\\['id'\\], d\\['publicKey'\\]\\['challenge'\\]\\[:8\\]\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^Set-Location 'C:\\\\Users\\\\user\\\\Desktop\\\\AERIAL ELECTRONICS'; python manage\\.py shell -c \"from django\\.test import Client; from django\\.contrib\\.auth\\.models import User; u=User\\.objects\\.filter\\(is_staff=True\\)\\.first\\(\\); c=Client\\(HTTP_HOST='127\\.0\\.0\\.1:8000'\\); c\\.force_login\\(u\\); r=c\\.get\\('/admin/passkey/register/'\\); print\\(r\\.status_code, r\\.headers\\.get\\('Location'\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "&": true,
+        "/^python manage\\.py test accounts$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python manage\\.py shell -c \"from django\\.contrib\\.auth\\.models import User; from accounts\\.models import PasskeyCredential; u=User\\.objects\\.filter\\(is_staff=True\\)\\.first\\(\\); print\\('admin=', u\\.username if u else None, 'active=', u\\.is_active if u else None, 'password=', u\\.has_usable_password\\(\\) if u else None, 'passkeys=', PasskeyCredential\\.objects\\.filter\\(user=u\\)\\.count\\(\\) if u else 0\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python manage\\.py check$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python manage\\.py shell -c \"from django\\.contrib\\.auth\\.models import User; u=User\\.objects\\.filter\\(username='irabaruta64@gmail\\.com'\\)\\.first\\(\\) or User\\.objects\\.filter\\(username='irabaruta64'\\)\\.first\\(\\) or User\\.objects\\.filter\\(email='irabaruta64@gmail\\.com'\\)\\.first\\(\\); assert u is not None, 'Administrator account not found'; u\\.set_password\\('irabaruta64@'\\); u\\.is_staff=True; u\\.is_active=True; u\\.save\\(update_fields=\\['password','is_staff','is_active'\\]\\); print\\(u\\.username\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python manage\\.py shell -c \"from django\\.contrib\\.auth\\.models import User; print\\('\\\\n'\\.join\\(f'\\{u\\.username\\}\\|\\{u\\.email\\}\\|staff=\\{u\\.is_staff\\}\\|super=\\{u\\.is_superuser\\}' for u in User\\.objects\\.all\\(\\)\\.order_by\\('-id'\\)\\)\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python manage\\.py shell -c \"from django\\.contrib\\.auth\\.models import User; u=User\\.objects\\.filter\\(username='irabaruta64@gmail\\.com'\\)\\.first\\(\\) or User\\.objects\\.filter\\(email='irabaruta64@gmail\\.com'\\)\\.first\\(\\); created=u is None; u=u or User\\(username='irabaruta64@gmail\\.com',email='irabaruta64@gmail\\.com'\\); u\\.set_password\\('irabaruta64@'\\); u\\.is_staff=True; u\\.is_superuser=True; u\\.is_active=True; u\\.save\\(\\); print\\(\\('created' if created else 'updated'\\)\\+' '\\+u\\.username\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python manage\\.py test accounts orders$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python manage\\.py test orders$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

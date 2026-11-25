@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Administrator Security{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2 class="fw-bold mb-4"><i class="bi bi-shield-lock text-primary"></i> Administrator Security</h2>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3"><div><h4 class="mb-1">Face, fingerprint and passkeys</h4><p class="text-muted mb-0">Manage Windows Hello and other registered devices.</p></div><button id="passkeyButton" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add passkey</button></div>
+        <div id="passkeyStatus" class="alert d-none"></div>
+        {% for passkey in passkeys %}
+        <div class="border rounded p-3 mb-2"><div class="d-flex justify-content-between align-items-center"><div><i class="bi bi-fingerprint fs-4 text-primary me-2"></i><strong>{{ passkey.name }}</strong><div class="small text-muted">Added {{ passkey.created_at|date:'d M Y' }}</div></div><div class="d-flex gap-2"><form method="post" class="d-flex gap-1">{% csrf_token %}<input type="hidden" name="action" value="rename_passkey"><input type="hidden" name="credential_id" value="{{ passkey.id }}"><input name="name" value="{{ passkey.name }}" class="form-control form-control-sm"><button class="btn btn-sm btn-outline-primary">Rename</button></form><form method="post">{% csrf_token %}<input type="hidden" name="action" value="delete_passkey"><input type="hidden" name="credential_id" value="{{ passkey.id }}"><button class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this passkey?')">Delete</button></form></div></div></div>
+        {% empty %}<div class="alert alert-warning"><strong>No passkey registered.</strong><br>1. Set up Windows Hello Face or Fingerprint in Windows Settings.<br>2. Open this page at <strong>http://localhost:8000</strong> in Chrome or Edge.<br>3. Select <strong>Add passkey</strong>, then confirm with face or fingerprint.</div>{% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm p-4"><h4>Administrator password</h4><p class="text-muted">Change or replace the account password.</p><form method="post">{% csrf_token %}<input type="hidden" name="action" value="change_password"><label class="form-label">Current password</label><input type="password" name="current_password" class="form-control mb-3" required><label class="form-label">New password</label><input type="password" name="new_password" minlength="12" class="form-control mb-3" required><label class="form-label">Confirm new password</label><input type="password" name="confirm_password" minlength="12" class="form-control mb-3" required><button class="btn btn-dark w-100">Change password</button></form></div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const button=document.getElementById('passkeyButton'),status=document.getElementById('passkeyStatus');
+  async function diagnose(){
+    if(!window.isSecureContext){status.className='alert alert-danger';status.textContent='Passkeys require HTTPS or http://localhost. Open http://localhost:8000 instead of an IP address.';status.classList.remove('d-none');button.disabled=true;return}
+    if(!window.PublicKeyCredential){status.className='alert alert-danger';status.textContent='This browser does not support passkeys. Use Chrome or Edge.';status.classList.remove('d-none');button.disabled=true;return}
+    try{const available=await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();if(!available){status.className='alert alert-warning';status.textContent='Windows Hello is unavailable. Set up face or fingerprint in Windows Settings > Accounts > Sign-in options.';status.classList.remove('d-none');button.disabled=true}}
+    catch(error){status.className='alert alert-warning';status.textContent='Could not detect Windows Hello. Ensure face or fingerprint sign-in is configured.';status.classList.remove('d-none')}
+  }
+  diagnose();
+  function cookie(name){const match=document.cookie.match(new RegExp('(^| )'+name+'=([^;]+)'));return match?decodeURIComponent(match[2]):''}
+  function base64Url(value){const bytes=new Uint8Array(value);let binary='';bytes.forEach(b=>binary+=String.fromCharCode(b));return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+  function decode(value){const base64=value.replace(/-/g,'+').replace(/_/g,'/').padEnd(Math.ceil(value.length/4)*4,'=');const binary=atob(base64);return Uint8Array.from(binary,c=>c.charCodeAt(0)).buffer}
+  function prepare(options){options.challenge=decode(options.challenge);if(options.user&&options.user.id)options.user.id=decode(options.user.id);if(options.excludeCredentials)options.excludeCredentials.forEach(c=>c.id=decode(c.id));if(options.allowCredentials)options.allowCredentials.forEach(c=>c.id=decode(c.id));return options}
+  async function post(url,payload){const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':cookie('csrftoken')},body:JSON.stringify(payload)});const data=await response.json();if(!response.ok)throw new Error(data.error||'Passkey operation failed.');return data}
+  button.addEventListener('click',async()=>{status.className='alert alert-info';status.textContent='Waiting for fingerprint, face recognition or device PIN...';status.classList.remove('d-none');try{
+    const begin=await post('{% url "passkey_register_begin" %}',{});const credential=await navigator.credentials.create({publicKey:prepare(begin.publicKey)});
+    const response={id:credential.id,rawId:base64Url(credential.rawId),type:credential.type,response:{clientDataJSON:base64Url(credential.response.clientDataJSON),attestationObject:base64Url(credential.response.attestationObject),transports:credential.response.getTransports?credential.response.getTransports():[]}};
+    await post('{% url "passkey_register_complete" %}',response);window.location.reload();
+  }catch(error){status.className='alert alert-danger';status.textContent=(error.name?error.name+': ':'')+(error.message||'The passkey was cancelled or is unavailable.')}});
+})();
+</script>
+{% endblock %}

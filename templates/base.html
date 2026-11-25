@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AERIAL ELECTRONICS{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/static/css/site.css">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg sticky-top bg-white border-bottom">
+  <div class="container">
+    <a class="navbar-brand aerial-brand fw-bold text-primary" href="{% url 'home' %}">
+      <span class="aerial-brand-name"><i class="bi bi-lightning-charge-fill"></i> {% if site_settings.logo_url %}<img src="{{ site_settings.logo_url }}" alt="{{ site_settings.business_name }}" style="height:32px">{% else %}AERIAL <span class="text-dark">ELECTRONICS</span>{% endif %}</span>
+      <span class="aerial-brand-slogan">{{ site_settings.brand_slogan }}</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="{% url 'products' %}">Shop</a></li><li class="nav-item"><a class="nav-link" href="{% url 'home' %}#about">About</a></li><li class="nav-item"><a class="nav-link" href="{% url 'promotions' %}">Promotions</a></li><li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li></ul>
+      <div class="d-flex align-items-center gap-2">
+        <div id="google_translate_element" aria-label="Language translation"></div>
+        <select class="form-select form-select-sm d-none d-lg-block aerial-language-select" aria-label="Choose language" style="width:150px">
+          <option value="en">English</option>
+          <option value="rw">Kinyarwanda</option>
+          <option value="fr">Français</option>
+          <option value="sw">Kiswahili</option>
+          <option value="lg">Luganda</option>
+          <option value="ar">العربية</option>
+        </select>
+        <button class="btn theme-toggle themeToggle" type="button" title="Switch light or dark mode"><i class="bi bi-moon-stars"></i></button>
+        <button id="aiNavToggle" class="btn btn-primary ai-nav-button" type="button"><i class="bi bi-stars"></i> AERIAL AI</button>
+        {% if user.is_authenticated and user.is_staff %}<a class="btn btn-outline-dark" href="{% url 'admin_dashboard' %}"><i class="bi bi-grid"></i> Admin panel</a>{% endif %}
+        <a class="btn btn-light position-relative" href="{% url 'cart' %}"><i class="bi bi-bag"></i> Cart</a>
+        {% if user.is_authenticated %}<a class="btn btn-outline-primary" href="{% if user.is_staff %}{% url 'admin_dashboard' %}{% else %}{% url 'account' %}{% endif %}"><i class="bi bi-person"></i> {% if user.is_staff %}Admin{% else %}Account{% endif %}</a>{% else %}<a class="btn btn-outline-primary" href="{% url 'login' %}">Sign in</a><a class="btn btn-dark" href="{% url 'staff_login' %}"><i class="bi bi-shield-lock"></i> Admin</a>{% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+{% if messages %}<div class="container mt-3">{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+{% block content %}{% endblock %}
+<script>
+document.querySelectorAll('[data-loading-form]').forEach(form => form.addEventListener('submit', () => {
+  const button = form.querySelector('.auth-submit');
+  if (!button) return;
+  button.disabled = true;
+  button.querySelector('.spinner-border')?.classList.remove('d-none');
+  const label = button.querySelector('.button-label');
+  if (label) label.textContent = 'Please wait…';
+}));
+</script>
+<footer class="bg-dark text-white mt-5 py-5"><div class="container"><div class="row g-4"><div class="col-md-5"><h5>{{ site_settings.business_name }}</h5><p class="text-white-50">{{ site_settings.footer_text }}</p></div><div class="col-md-4"><h6>Contact</h6><p class="mb-1">{{ site_settings.phone }}</p><p>{{ site_settings.address }}</p></div><div class="col-md-3"><h6>CEO</h6><p>{{ site_settings.ceo_name }}</p></div></div></div></footer>
+
+<div id="aerialAssistant" class="ai-assistant">
+  <button id="aiToggle" class="ai-toggle" type="button" aria-label="Open AI assistant"><i class="bi bi-stars"></i><span>AERIAL AI</span></button>
+  <div id="aiPanel" class="ai-panel">
+    <div class="ai-header"><div><strong>AERIAL AI Assistant</strong><div class="small opacity-75">English · Kinyarwanda · Français · Kiswahili</div></div><button id="aiClose" class="btn btn-sm text-white" type="button" aria-label="Close"><i class="bi bi-x-lg"></i></button></div>
+    <div class="ai-language"><label for="aiLanguage">Language</label><select id="aiLanguage" class="form-select form-select-sm"><option value="auto">Auto</option><option value="en">English</option><option value="rw">Kinyarwanda</option><option value="fr">Français</option><option value="sw">Kiswahili</option></select></div>
+    <div id="aiMessages" class="ai-messages"><div class="ai-message ai-bot">Hello! Ask me how to browse products, use the cart, pay with MTN Mobile Money, track an order, or print an invoice.</div></div>
+    <form id="aiForm" class="ai-form"><input id="aiInput" class="form-control" placeholder="Ask in any language..." autocomplete="off" required><button class="btn btn-primary" type="submit"><i class="bi bi-send"></i></button></form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript">
+function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:'en',includedLanguages:'en,rw,fr,sw,lg,ar',layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:false},'google_translate_element')}
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+(function(){
+  const savedTheme=localStorage.getItem('aerial-theme') || 'light';
+  document.documentElement.dataset.theme=savedTheme;
+  document.querySelectorAll('.themeToggle').forEach(button=>{
+    function refresh(){const dark=document.documentElement.dataset.theme==='dark';button.innerHTML=dark?'<i class="bi bi-sun"></i>':'<i class="bi bi-moon-stars"></i>';button.setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode')}
+    refresh();
+    button.addEventListener('click',()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';localStorage.setItem('aerial-theme',document.documentElement.dataset.theme);refresh()});
+  });
+})();
+</script>
+<script>
+(function(){
+  const toggle=document.getElementById('aiToggle'),navToggle=document.getElementById('aiNavToggle'),panel=document.getElementById('aiPanel'),close=document.getElementById('aiClose');
+  const form=document.getElementById('aiForm'),input=document.getElementById('aiInput'),messages=document.getElementById('aiMessages'),language=document.getElementById('aiLanguage');
+  function openPanel(){panel.classList.add('open');input.focus()}
+  toggle.addEventListener('click',()=>panel.classList.toggle('open'));
+  navToggle.addEventListener('click',openPanel);
+  close.addEventListener('click',()=>panel.classList.remove('open'));
+  if(window.innerWidth>=992&&sessionStorage.getItem('aerial-ai-opened')!=='true'){openPanel();sessionStorage.setItem('aerial-ai-opened','true')}
+  function cookie(name){const match=document.cookie.match(new RegExp('(^| )'+name+'=([^;]+)'));return match?decodeURIComponent(match[2]):''}
+  form.addEventListener('submit',async event=>{event.preventDefault();const text=input.value.trim();if(!text)return;messages.insertAdjacentHTML('beforeend','<div class="ai-message ai-user"></div>');messages.lastElementChild.textContent=text;input.value='';messages.insertAdjacentHTML('beforeend','<div class="ai-message ai-bot ai-loading">Thinking...</div>');messages.scrollTop=messages.scrollHeight;
+    try{const response=await fetch('{% url "ai_assistant" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':cookie('csrftoken')},body:JSON.stringify({message:text,language:language.value})});const data=await response.json();messages.querySelector('.ai-loading')?.remove();messages.insertAdjacentHTML('beforeend','<div class="ai-message ai-bot"></div>');messages.lastElementChild.textContent=data.answer||data.error||'Sorry, I could not answer that.';}catch(error){messages.querySelector('.ai-loading')?.remove();messages.insertAdjacentHTML('beforeend','<div class="ai-message ai-bot">Connection error. Please try again.</div>');}
+    messages.scrollTop=messages.scrollHeight;
+  });
+  document.querySelectorAll('.aerial-language-select').forEach(select=>{
+    const savedLanguage=localStorage.getItem('aerial-language') || 'en';
+    select.value=savedLanguage;
+    select.addEventListener('change',()=>{
+      const language=select.value;
+      localStorage.setItem('aerial-language',language);
+      const value=language==='en' ? '/en/en' : `/en/${language}`;
+      document.cookie=`googtrans=${value}; path=/`;
+      document.cookie=`googtrans=${value}; domain=.${location.hostname}; path=/`;
+      const googleSelect=document.querySelector('.goog-te-combo');
+      if(googleSelect){
+        googleSelect.value=language;
+        googleSelect.dispatchEvent(new Event('change'));
+      } else {
+        location.reload();
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

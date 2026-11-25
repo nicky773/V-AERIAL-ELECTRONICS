@@ -1,0 +1,35 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Customers{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div><h2 class="mb-1">Customers</h2><p class="text-muted mb-0">Search and review registered customer accounts.</p></div>
+</div>
+<div class="card stat-card p-3">
+  <form method="get" class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="search" name="q" value="{{ query }}" class="form-control" placeholder="Search by name, email or phone number">
+      <button class="btn btn-primary">Search</button>
+      {% if query %}<a href="{% url 'admin_customers' %}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+    </div>
+  </form>
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Joined</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for customer in customers %}
+      <tr>
+        <td><strong>{{ customer.get_full_name|default:customer.username }}</strong></td>
+        <td>{{ customer.email|default:"—" }}</td>
+        <td>{% if customer.phone_credential %}{{ customer.phone_credential.phone }}{% else %}—{% endif %}</td>
+        <td>{{ customer.date_joined|date:'d M Y, H:i' }}</td>
+        <td><span class="badge {% if customer.is_active %}bg-success{% else %}bg-danger{% endif %}">{% if customer.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-center text-muted py-4">No customers match the search.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

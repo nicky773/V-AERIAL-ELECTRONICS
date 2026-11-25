@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AERIAL ADMIN PANEL{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/static/css/site.css">
+</head>
+<body>
+<div class="row g-0 admin-shell">
+  <aside class="col-md-2 admin-sidebar p-3">
+    <a class="navbar-brand text-white fw-bold d-block mb-4" href="{% url 'admin_dashboard' %}">AERIAL ADMIN</a>
+    <a href="{% url 'admin_dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a>
+    <a href="{% url 'admin_customers' %}"><i class="bi bi-person"></i> Customers</a>
+    <a href="{% url 'admin_categories' %}"><i class="bi bi-grid-3x3-gap"></i> Categories</a>
+    <a href="{% url 'admin_inventory' %}"><i class="bi bi-box-seam"></i> Inventory</a>
+    <a href="{% url 'admin_orders' %}"><i class="bi bi-bag-check"></i> Orders</a>
+    <a href="{% url 'admin_messages' %}"><i class="bi bi-chat"></i> Messages</a>
+    <a href="{% url 'admin_invoices' %}"><i class="bi bi-receipt"></i> Invoices</a>
+    <a href="{% url 'admin_promotions' %}"><i class="bi bi-tag"></i> Promotions</a>
+    <a href="{% url 'home' %}"><i class="bi bi-shop"></i> Storefront</a>
+    <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Sign out</a>
+    <a href="{% url 'passkey_register' %}"><i class="bi bi-fingerprint"></i> Face / Fingerprint</a>
+    <a href="{% url 'admin_website' %}"><i class="bi bi-pencil-square"></i> Website Editor</a>
+  </aside>
+  <main class="col-md-10 p-4 bg-light">
+    <div class="d-flex justify-content-end align-items-center gap-2 mb-3">
+      <select class="form-select form-select-sm aerial-language-select" aria-label="Choose language" style="width:150px">
+        <option value="en">English</option>
+        <option value="rw">Kinyarwanda</option>
+        <option value="fr">Français</option>
+        <option value="sw">Kiswahili</option>
+        <option value="lg">Luganda</option>
+        <option value="ar">العربية</option>
+      </select>
+      <button class="btn theme-toggle themeToggle" type="button" title="Switch light or dark mode"><i class="bi bi-moon-stars"></i></button>
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<div id="google_translate_element" class="d-none"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+ const saved=localStorage.getItem('aerial-theme') || 'light';document.documentElement.dataset.theme=saved;
+ document.querySelectorAll('.themeToggle').forEach(button=>{function refresh(){const dark=document.documentElement.dataset.theme==='dark';button.innerHTML=dark?'<i class="bi bi-sun"></i>':'<i class="bi bi-moon-stars"></i>';button.setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode')}refresh();button.addEventListener('click',()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';localStorage.setItem('aerial-theme',document.documentElement.dataset.theme);refresh()})});
+})();
+document.querySelectorAll('.aerial-language-select').forEach(select=>{
+ const savedLanguage=localStorage.getItem('aerial-language') || 'en';
+ select.value=savedLanguage;
+ select.addEventListener('change',()=>{
+  const language=select.value;
+  localStorage.setItem('aerial-language',language);
+  const value=language==='en' ? '/en/en' : `/en/${language}`;
+  document.cookie=`googtrans=${value}; path=/`;
+  document.cookie=`googtrans=${value}; domain=.${location.hostname}; path=/`;
+  const googleSelect=document.querySelector('.goog-te-combo');
+  if(googleSelect){googleSelect.value=language;googleSelect.dispatchEvent(new Event('change'));}
+  else {location.reload();}
+ });
+});
+</script>
+<script type="text/javascript">
+function googleTranslateElementInit(){new google.translate.TranslateElement({pageLanguage:'en',includedLanguages:'en,rw,fr,sw,lg,ar',layout:google.translate.TranslateElement.InlineLayout.SIMPLE,autoDisplay:false},'google_translate_element')}
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
