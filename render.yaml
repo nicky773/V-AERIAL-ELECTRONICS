@@ -16,10 +16,20 @@ services:
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
-        value: aerial-electronics.onrender.com
+        value: v-aerial-electronics.onrender.com
       - key: CSRF_TRUSTED_ORIGINS
-        value: https://aerial-electronics.onrender.com
+        value: https://v-aerial-electronics.onrender.com
       - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_ENDPOINT_URL
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_PUBLIC_DOMAIN
         sync: false
       - key: MTN_CALLBACK_SECRET
         sync: false

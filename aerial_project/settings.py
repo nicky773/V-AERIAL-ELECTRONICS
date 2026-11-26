@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,10 +29,16 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-aerial-electronics-develop
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
+render_external_hostname = os.getenv('RENDER_EXTERNAL_HOSTNAME', '').strip()
+if render_external_hostname and render_external_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_external_hostname)
+
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
+render_external_url = os.getenv('RENDER_EXTERNAL_URL', '').strip()
+if render_external_url and render_external_url not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append(render_external_url)
 
 if not DEBUG:
-    from django.core.exceptions import ImproperlyConfigured
     if SECRET_KEY.startswith('django-insecure'):
         raise ImproperlyConfigured('Set a real SECRET_KEY environment variable before turning DEBUG off.')
     # Render terminates HTTPS in front of the app; trust its forwarded-protocol header.
@@ -96,10 +103,16 @@ WSGI_APPLICATION = 'aerial_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+IS_RENDER = os.getenv('RENDER', '').lower() == 'true'
+if IS_RENDER and not DATABASE_URL:
+    raise ImproperlyConfigured('DATABASE_URL must be set in production to connect to Render PostgreSQL.')
+
 if DATABASE_URL:
     # Render's Postgres gives one connection string: postgresql://user:password@host:port/name
     from urllib.parse import unquote, urlparse
     _db = urlparse(DATABASE_URL)
+    if _db.scheme not in {'postgres', 'postgresql'} or not _db.hostname or not _db.path.strip('/'):
+        raise ImproperlyConfigured('DATABASE_URL is invalid. Set it to the Render PostgreSQL connection string with a hostname and database name.')
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -110,6 +123,18 @@ if DATABASE_URL:
             'PORT': str(_db.port or 5432),
             'CONN_MAX_AGE': 600,
             'OPTIONS': {'sslmode': os.getenv('DB_SSLMODE', 'prefer')},
+        }
+    }
+elif os.getenv('DB_NAME'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+            'CONN_MAX_AGE': 600,
         }
     }
 else:
@@ -160,6 +185,40 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Product and website image files stay on the local filesystem until a complete
+# R2 configuration is present. Static assets remain served by WhiteNoise.
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+}
+
+R2_BUCKET_NAME = os.getenv('R2_BUCKET_NAME', '').strip()
+R2_ENDPOINT_URL = os.getenv('R2_ENDPOINT_URL', '').strip()
+R2_ACCESS_KEY_ID = os.getenv('R2_ACCESS_KEY_ID', '').strip()
+R2_SECRET_ACCESS_KEY = os.getenv('R2_SECRET_ACCESS_KEY', '').strip()
+R2_PUBLIC_DOMAIN = os.getenv('R2_PUBLIC_DOMAIN', '').strip().removeprefix('https://').removeprefix('http://').rstrip('/')
+
+R2_CONFIGURED = all((R2_BUCKET_NAME, R2_ENDPOINT_URL, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY))
+if R2_CONFIGURED:
+    r2_options = {
+        'access_key': R2_ACCESS_KEY_ID,
+        'secret_key': R2_SECRET_ACCESS_KEY,
+        'bucket_name': R2_BUCKET_NAME,
+        'endpoint_url': R2_ENDPOINT_URL,
+        'region_name': 'auto',
+        'signature_version': 's3v4',
+        'addressing_style': 'path',
+        'file_overwrite': False,
+        'default_acl': None,
+        'querystring_auth': not bool(R2_PUBLIC_DOMAIN),
+    }
+    if R2_PUBLIC_DOMAIN:
+        r2_options.update({'custom_domain': R2_PUBLIC_DOMAIN, 'url_protocol': 'https:'})
+    STORAGES['default'] = {
+        'BACKEND': 'storages.backends.s3.S3Storage',
+        'OPTIONS': r2_options,
+    }
 
 
 # Default primary key field type
